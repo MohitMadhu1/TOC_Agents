@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #030303;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  background-color: transparent;
+}
+
+#root {
+  width: 100%;
+}
+
+.gold-sheen {
+  background: linear-gradient(
+    to bottom,
+    #806226 0%,
+    #C5A021 50%,
+    #806226 100%
+  );
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 15px rgba(197, 160, 33, 0.3));
+}
+
+.gold-border {
+  border: 1.5px solid rgba(197, 160, 33, 0.4);
+  box-shadow: 0 0 20px rgba(197, 160, 33, 0.1);
+  backdrop-filter: blur(12px);
+}
+
+.gold-button {
+  background: linear-gradient(135deg, #C5A021 0%, #806226 100%);
+  color: #000B26;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1), 0 0 20px rgba(197, 160, 33, 0.3);
+}
