@@ -5,7 +5,7 @@ import edgehandles from 'cytoscape-edgehandles';
 import { RotateCcw, SkipForward, Zap, Trash2, ShieldCheck, Target, ArrowUpRight, RefreshCcw, Settings2, AlertCircle, LayoutGrid, BookOpen, Play, Pause, CheckCircle2, XCircle, GitBranch } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-cytoscape.use(edgehandles);
+// Plugin registered globally in main.tsx
 
 const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([
@@ -399,7 +399,7 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
-      <div className="h-16 w-full border-b border-white/5 flex items-center justify-between px-8 bg-black/40 backdrop-blur-xl z-50">
+      <div className="flex-none h-16 w-full border-b border-white/5 flex items-center justify-between px-8 bg-black/40 backdrop-blur-xl z-50">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-full text-white/30 hover:text-[#C5A021] transition-all mr-2">
             <RotateCcw size={18} className="-scale-x-100" />
@@ -432,7 +432,7 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         )}
       </AnimatePresence>
 
-      <div className="flex-grow flex relative">
+      <div className="flex-grow flex min-h-0 overflow-hidden relative">
         <div className="w-80 h-full border-r border-white/5 bg-black/20 backdrop-blur-3xl z-40 flex flex-col p-6 overflow-hidden">
           <div className="flex gap-2 mb-8 p-1 bg-white/5 rounded-xl border border-white/5">
             <button onClick={() => setActiveTab('inspector')} className={`flex-grow py-2 rounded-lg text-[10px] uppercase font-black tracking-widest transition-all ${activeTab === 'inspector' ? 'bg-[#C5A021] text-black shadow-lg shadow-[#C5A021]/20' : 'text-white/20 hover:text-white/40'}`}>Workbench</button>
@@ -459,7 +459,25 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                       )}
                       <button onClick={() => deleteItems(selectedId)} className="w-full mt-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-[9px] font-black uppercase tracking-widest text-red-500/60 hover:bg-red-500/20 transition-all font-mono">Delete Entry</button>
                     </div>
-                  ) : (<div className="space-y-6"><button onClick={() => addState()} className="w-full py-4 bg-[#C5A021] text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-2xl font-mono">+ Add NFA State</button></div>)}
+                  ) : (
+                    <div className="flex flex-col pt-4">
+                      <div className="mb-10 group">
+                        <div className="flex items-center gap-3 text-[#C5A021]/60 mb-4 group-focus-within:text-[#C5A021] transition-all">
+                          <Zap size={10} fill="currentColor" />
+                          <span className="text-[9px] font-black uppercase tracking-[0.6em]">Oracle Nexus</span>
+                        </div>
+                        <div className="relative">
+                          <input placeholder="NEURAL PROMPT..." className="w-full bg-transparent border-b border-white/10 p-2 text-[11px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-[#C5A021]/50 placeholder:text-white/5 transition-all" />
+                          <button className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 hover:text-[#C5A021] transition-all"><ArrowUpRight size={16} /></button>
+                        </div>
+                      </div>
+                      
+                      <button onClick={() => addState()} className="w-full py-5 border border-[#C5A021]/30 hover:bg-[#C5A021] hover:text-black rounded-full text-[10px] font-black uppercase tracking-[0.4em] transition-all group overflow-hidden relative">
+                         <span className="relative z-10">+ Construct NFA Node</span>
+                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               ) : activeTab === 'quantum' ? (
                 <motion.div key="quantum" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 1.05 }} className="space-y-6">
@@ -473,7 +491,7 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                   </div>
                   
                   {simulationSteps.length > 0 ? (
-                    <div className="space-y-4">
+                    <div className="space-y-2 pr-2">
                       {simulationSteps.map((set, i) => {
                         const isCurrentActiveLevel = i === currentStepIndex;
                         return (
@@ -498,8 +516,6 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                               <div className="flex gap-2 flex-wrap relative z-10">
                                 {set.map(obj => {
                                     const node = currentNodes.find(n => n.data.id === obj.id);
-                                    const isFinal = node?.data.isFinal;
-                                    const isTerminalStep = i === simulationSteps.length - 1;
                                     const isPartOfSuccessPath = successPathNodes.has(`${i}-${obj.id}`);
                                     
                                     return (
@@ -519,18 +535,49 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                       })}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-12 text-center text-white/20 gap-4 border border-white/5 border-dashed rounded-3xl">
-                      <SkipForward size={40} />
-                      <p className="text-[9px] font-black uppercase tracking-widest px-8">Run 'Verify' to generate the branch expansion tree.</p>
+                    <div className="h-64 flex flex-col items-center justify-center text-center opacity-20 px-8">
+                       <GitBranch size={40} className="mb-4" />
+                       <p className="text-[10px] font-black uppercase tracking-[0.3em]">No Simulation Data</p>
                     </div>
                   )}
                 </motion.div>
               ) : (
-                <motion.div key="tuple" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6 text-white/60 font-mono text-[11px]">
-                  <h3 className="text-[10px] font-black tracking-[0.4em] text-[#C5A021] uppercase border-b border-white/5 pb-4">NFA Specification</h3>
-                  <div><span className="text-[#C5A021] font-bold tracking-widest mr-2">Q :</span> &#123; {currentNodes.map(n => n.data.label).join(', ')} &#125;</div>
-                  <div><span className="text-[#C5A021] font-bold tracking-widest mr-2">&Sigma;</span> &#123; {Array.from(alphabetSet).sort().join(', ') || '&empty;'} &#125;</div>
-                  <div><span className="text-[#C5A021] font-bold tracking-widest mr-2">&delta; :</span> Q &times; (&Sigma; &cup; &#123;&epsilon;&#125;) &rarr; P(Q)</div>
+                <motion.div key="tuple" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-12 text-white/50 font-mono text-[10px] pb-10 pt-4">
+                    <div className="space-y-6">
+                      <div>
+                        <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">States (Q)</div>
+                        <div className="pl-2 border-l border-white/5 leading-relaxed tracking-widest">
+                           {currentNodes.map(n => n.data.label).join(' // ')}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">Alphabet (&Sigma;)</div>
+                        <div className="pl-2 border-l border-white/5 tracking-widest">
+                           {Array.from(alphabetSet).sort().join(' / ') || 'EMPTY_SET'}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">Transitions (&delta;)</div>
+                        <div className="max-h-48 overflow-y-auto pr-2 text-[9px] opacity-40 font-mono scrollbar-hide space-y-1 border-l border-white/5 pl-2">
+                          {currentEdges.map(e => (
+                             <div key={e.data.id}>({e.data.source}, {e.data.label}) &rarr; &#123; {e.data.target} &#125;</div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-6 border-t border-white/5 flex flex-col gap-6">
+                        <div>
+                          <span className="text-[#C5A021]/40 font-bold tracking-[0.3em] uppercase block mb-1">Entry (q₀)</span> 
+                          <span className="text-white text-[12px] font-black italic tracking-tighter uppercase">{currentNodes.find(n => n.data.isInitial)?.data.label || 'N/A'}</span>
+                        </div>
+                        <div>
+                          <span className="text-[#C5A021]/40 font-bold tracking-[0.3em] uppercase block mb-1">Acceptance (F)</span> 
+                          <span className="text-white tracking-widest">{currentNodes.filter(n => n.data.isFinal).map(n => n.data.label).join(', ') || '&empty;'}</span>
+                        </div>
+                      </div>
+                    </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -558,7 +605,7 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         </div>
       </div>
 
-      <div className="h-32 w-full border-t border-white/5 bg-black/60 backdrop-blur-3xl flex items-center px-12 gap-12 z-50">
+      <div className="flex-none h-32 w-full border-t border-white/5 bg-black/60 backdrop-blur-3xl flex items-center px-12 gap-12 z-50">
         <div className="flex flex-col gap-3 min-w-[280px]">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 flex items-center gap-3 font-mono"><GitBranch size={12} className="text-[#C5A021]" /> Simulation Hub</span>

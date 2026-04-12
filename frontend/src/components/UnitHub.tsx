@@ -3,11 +3,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const units = [
   { id: '01', title: 'Finite Automata', desc: 'The fundamental mathematical models of computation including DFA, NFA, and the logic of Regular Expressions.', stats: 'Unit Core / Stable' },
-  { id: '02', title: 'Context-Free Logic', desc: 'Pushdown Automata and the architecture of Context-Free Grammars used in compiler design.', stats: 'Locked / Sequential' },
-  { id: '03', title: 'Turing Architecture', desc: 'Universal computation, decidability, and the theoretical limits of modern computing machines.', stats: 'Locked / Terminal' },
+  { id: '02', title: 'Regular Languages', desc: 'Bridge the gap between "code-like strings" (Regex) and "machines" (Automata). Master the laws of algebraic simplification and the Pumping Lemma.', stats: 'Ready / Sequential' },
+  { id: '03', title: 'Turing Machines', desc: 'The universal model of computation and the philosophical limits of what can be calculated. Master Unit 5 & 6.', stats: 'Ready / Terminal' },
 ];
 
-const UnitHub: React.FC<{ onSelectUnit: () => void }> = ({ onSelectUnit }) => {
+const UnitHub: React.FC<{ onSelectUnit: () => void, onSelectUnit2: () => void, onSelectUnit3: () => void }> = ({ onSelectUnit, onSelectUnit2, onSelectUnit3 }) => {
   const [activeUnit, setActiveUnit] = useState(units[0]);
 
   return (
@@ -41,8 +41,12 @@ const UnitHub: React.FC<{ onSelectUnit: () => void }> = ({ onSelectUnit }) => {
           <motion.div
             key={unit.id}
             onMouseEnter={() => setActiveUnit(unit)}
-            onClick={unit.id === '01' ? onSelectUnit : undefined}
-            className={`group cursor-pointer relative ${unit.id !== '01' ? 'opacity-30' : ''}`}
+            onClick={() => {
+                if (unit.id === '01') onSelectUnit();
+                if (unit.id === '02') onSelectUnit2();
+                if (unit.id === '03') onSelectUnit3();
+            }}
+            className="group cursor-pointer relative"
           >
             <div className="flex items-baseline gap-8">
               <span className={`text-xl font-mono tracking-tighter ${activeUnit.id === unit.id ? 'text-[#C5A021]' : 'text-white/20'}`}>
@@ -86,18 +90,16 @@ const UnitHub: React.FC<{ onSelectUnit: () => void }> = ({ onSelectUnit }) => {
                     {activeUnit.desc}
                 </p>
                 
-                {activeUnit.id === '01' ? (
-                    <button 
-                        onClick={onSelectUnit}
-                        className="py-4 px-10 border border-[#C5A021] text-[#C5A021] text-[10px] uppercase font-black tracking-[0.4em] rounded-full hover:bg-[#C5A021] hover:text-black transition-all"
-                    >
-                        Initialize Module
-                    </button>
-                ) : (
-                    <div className="text-[10px] uppercase font-black tracking-[0.4em] text-white/10">
-                        Module Encrypted / Restricted
-                    </div>
-                )}
+                <button 
+                    onClick={() => {
+                        if (activeUnit.id === '01') onSelectUnit();
+                        if (activeUnit.id === '02') onSelectUnit2();
+                        if (activeUnit.id === '03') onSelectUnit3();
+                    }}
+                    className="py-4 px-10 border border-[#C5A021] text-[#C5A021] text-[10px] uppercase font-black tracking-[0.4em] rounded-full hover:bg-[#C5A021] hover:text-black transition-all"
+                >
+                    Initialize Module
+                </button>
             </motion.div>
         </AnimatePresence>
       </div>

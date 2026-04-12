@@ -5,7 +5,7 @@ import edgehandles from 'cytoscape-edgehandles';
 import { RotateCcw, Share2, Zap, Trash2, ShieldCheck, Target, ArrowUpRight, RefreshCcw, Settings2, AlertCircle, LayoutGrid, BookOpen, Play, Pause, CheckCircle2, XCircle, ChevronRight, Terminal } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-cytoscape.use(edgehandles);
+// edgehandles/dagre are registered globally in main.tsx
 
 interface ConversionState {
     id: string; // New DFA ID (A, B, C...)

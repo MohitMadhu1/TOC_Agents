@@ -7,9 +7,17 @@ import ConversionLab from './components/ConversionLab';
 import MinimizerSuite from './components/MinimizerSuite';
 import UnitHub from './components/UnitHub';
 import Phase1Dashboard from './components/Phase1Dashboard';
+import Phase2Dashboard from './components/Phase2Dashboard';
+import RegexPlayground from './components/RegexPlayground';
+import TranslatorLab from './components/TranslatorLab';
+import PumpingDuel from './components/PumpingDuel';
+import Phase3Dashboard from './components/Phase3Dashboard';
+import TuringStudio from './components/TuringStudio';
+import ComplexityLab from './components/ComplexityLab';
 
 function App() {
-  const [view, setView] = useState<'landing' | 'hub' | 'phase1_lab' | 'studio' | 'nfa_studio' | 'conversion' | 'minimizer'>('landing');
+  // Unit 2 Transformation Engine Active
+  const [view, setView] = useState<'landing' | 'hub' | 'phase1_lab' | 'phase2_lab' | 'phase3_lab' | 'studio' | 'nfa_studio' | 'conversion' | 'minimizer' | 'regex_studio' | 'translator_lab' | 'duel_mode' | 'turing_studio' | 'complexity_lab'>('landing');
 
   return (
     <div className="relative min-h-screen w-full bg-transparent text-white overflow-hidden font-sans">
@@ -80,9 +88,8 @@ function App() {
                 STUDIO<span className="text-[#C5A021]">.</span>
               </div>
               <div className="flex gap-16 text-[10px] font-black underline-offset-8 uppercase tracking-[0.6em] text-white/30">
-                <a href="#" className="hover:text-[#C5A021] transition-all">UNIT</a>
-                <a href="#" className="hover:text-[#D4AF37] transition-all">DOCS</a>
-                <a href="#" className="hover:text-[#D4AF37] transition-all">GITHUB</a>
+                <a href="https://www.linkedin.com/in/mohit-madhu-01919732a/" target="_blank" rel="noopener noreferrer" className="hover:text-[#C5A021] transition-all">LINKEDIN</a>
+                <a href="https://github.com/MohitMadhu1" target="_blank" rel="noopener noreferrer" className="hover:text-[#C5A021] transition-all">GITHUB</a>
               </div>
             </nav>
 
@@ -101,7 +108,11 @@ function App() {
             transition={{ duration: 0.6 }}
             className="w-full min-h-screen"
           >
-            <UnitHub onSelectUnit={() => setView('phase1_lab')} />
+            <UnitHub 
+                onSelectUnit={() => setView('phase1_lab')} 
+                onSelectUnit2={() => setView('phase2_lab')}
+                onSelectUnit3={() => setView('phase3_lab')}
+            />
           </motion.div>
         )}
 
@@ -173,6 +184,99 @@ function App() {
             className="w-full h-screen"
           >
             <MinimizerSuite onBack={() => setView('phase1_lab')} />
+          </motion.div>
+        )}
+
+        {view === 'phase2_lab' && (
+          <motion.div
+            key="phase2_lab"
+            initial={{ opacity: 0, filter: 'blur(20px)' }}
+            animate={{ opacity: 1, filter: 'blur(0px)' }}
+            exit={{ opacity: 0 }}
+            className="w-full h-screen"
+          >
+            <Phase2Dashboard 
+              onBack={() => setView('hub')} 
+              onLaunchRegex={() => setView('regex_studio')}
+              onLaunchTranslator={() => setView('translator_lab')}
+              onLaunchDuel={() => setView('duel_mode')}
+            />
+          </motion.div>
+        )}
+
+        {view === 'regex_studio' && (
+          <motion.div
+            key="regex_studio"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full h-screen"
+          >
+            <RegexPlayground onBack={() => setView('phase2_lab')} />
+          </motion.div>
+        )}
+
+        {view === 'translator_lab' && (
+          <motion.div
+            key="translator_lab"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full h-screen"
+          >
+            <TranslatorLab onBack={() => setView('phase2_lab')} />
+          </motion.div>
+        )}
+
+        {view === 'duel_mode' && (
+          <motion.div
+            key="duel_mode"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full h-screen"
+          >
+            <PumpingDuel onBack={() => setView('phase2_lab')} />
+          </motion.div>
+        )}
+
+        {view === 'phase3_lab' && (
+          <motion.div
+            key="phase3_lab"
+            initial={{ opacity: 0, scale: 1.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            className="w-full h-screen"
+          >
+            <Phase3Dashboard 
+              onBack={() => setView('hub')} 
+              onLaunchTuring={() => setView('turing_studio')}
+              onLaunchComplexity={() => setView('complexity_lab')}
+            />
+          </motion.div>
+        )}
+
+        {view === 'turing_studio' && (
+          <motion.div
+            key="turing_studio"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full h-screen"
+          >
+            <TuringStudio onBack={() => setView('phase3_lab')} />
+          </motion.div>
+        )}
+
+        {view === 'complexity_lab' && (
+          <motion.div
+            key="complexity_lab"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0 }}
+            className="w-full h-screen"
+          >
+            <ComplexityLab onBack={() => setView('phase3_lab')} />
           </motion.div>
         )}
       </AnimatePresence>

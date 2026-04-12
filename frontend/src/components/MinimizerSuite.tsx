@@ -5,7 +5,7 @@ import edgehandles from 'cytoscape-edgehandles';
 import { RotateCcw, Share2, Zap, Trash2, ShieldCheck, Target, ArrowUpRight, RefreshCcw, Settings2, AlertCircle, LayoutGrid, BookOpen, Play, Pause, CheckCircle2, XCircle, ChevronRight, Terminal, Grid3X3 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-cytoscape.use(edgehandles);
+// Plugin registered globally in main.tsx
 
 const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [dfaElements, setDfaElements] = useState<cytoscape.ElementDefinition[]>([

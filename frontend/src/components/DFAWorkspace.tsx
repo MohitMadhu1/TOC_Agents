@@ -5,7 +5,7 @@ import edgehandles from 'cytoscape-edgehandles';
 import { RotateCcw, SkipForward, Zap, Trash2, ShieldCheck, Target, ArrowUpRight, RefreshCcw, Settings2, AlertCircle, LayoutGrid, BookOpen, Play, Pause, CheckCircle2, XCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-cytoscape.use(edgehandles);
+// edgehandles/dagre are registered globally in main.tsx
 
 const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [elements, setElements] = useState<cytoscape.ElementDefinition[]>([
@@ -20,7 +20,7 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [activeTab, setActiveTab] = useState<'inspector' | 'tuple'>('inspector');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showExamples, setShowExamples] = useState(false);
-  
+
   const cyRef = useRef<cytoscape.Core | null>(null);
   const ehRef = useRef<any>(null);
 
@@ -48,15 +48,15 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       }
     },
     {
-        selector: 'node:selected, .eh-source, .eh-target, .eh-preview, node:active',
-        style: {
-          'width': 50,
-          'height': 50,
-          'shape': 'ellipse',
-          'border-width': 2,
-          'border-color': '#fff',
-          'background-color': '#002573'
-        }
+      selector: 'node:selected, .eh-source, .eh-target, .eh-preview, node:active',
+      style: {
+        'width': 50,
+        'height': 50,
+        'shape': 'ellipse',
+        'border-width': 2,
+        'border-color': '#fff',
+        'background-color': '#002573'
+      }
     },
     {
       selector: 'node[?isFinal]',
@@ -186,60 +186,60 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     if (!cleanChar) return;
 
     setElements(prev => {
-        const sourceEdges = prev.filter(e => e.data.source === source);
-        const alreadyHasChar = sourceEdges.some(e => {
-            const chars = e.data.label.split(',').map((s: string) => s.trim());
-            return chars.includes(cleanChar);
-        });
+      const sourceEdges = prev.filter(e => e.data.source === source);
+      const alreadyHasChar = sourceEdges.some(e => {
+        const chars = e.data.label.split(',').map((s: string) => s.trim());
+        return chars.includes(cleanChar);
+      });
 
-        if (alreadyHasChar) {
-            setErrorMessage(`DFA Rule Violation: State already has a transition for "${cleanChar}"`);
-            setTimeout(() => setErrorMessage(null), 3000);
-            return prev;
-        }
+      if (alreadyHasChar) {
+        setErrorMessage(`DFA Rule Violation: State already has a transition for "${cleanChar}"`);
+        setTimeout(() => setErrorMessage(null), 3000);
+        return prev;
+      }
 
-        const existingEdgeBetweenNodes = prev.find(e => e.data.source === source && e.data.target === target);
-        if (existingEdgeBetweenNodes) {
-            const chars = existingEdgeBetweenNodes.data.label.split(',').map((s: string) => s.trim());
-            const newLabel = [...chars, cleanChar].sort().join(', ');
-            return prev.map(e => e.data.id === existingEdgeBetweenNodes.data.id ? { ...e, data: { ...e.data, label: newLabel } } : e);
-        }
+      const existingEdgeBetweenNodes = prev.find(e => e.data.source === source && e.data.target === target);
+      if (existingEdgeBetweenNodes) {
+        const chars = existingEdgeBetweenNodes.data.label.split(',').map((s: string) => s.trim());
+        const newLabel = [...chars, cleanChar].sort().join(', ');
+        return prev.map(e => e.data.id === existingEdgeBetweenNodes.data.id ? { ...e, data: { ...e.data, label: newLabel } } : e);
+      }
 
-        const id = `edge-${source}-${target}-${Date.now()}`;
-        return [...prev, { data: { id, source, target, label: cleanChar } }];
+      const id = `edge-${source}-${target}-${Date.now()}`;
+      return [...prev, { data: { id, source, target, label: cleanChar } }];
     });
   };
 
   const loadExample = (type: 'starts' | 'ends' | 'parity') => {
     let newElements: cytoscape.ElementDefinition[] = [];
     if (type === 'starts') {
-        newElements = [
-            { data: { id: 'q0', label: 'Q0', isInitial: true, isFinal: false, width: 50, height: 50 }, position: { x: 200, y: 300 } },
-            { data: { id: 'q1', label: 'Q1', isInitial: false, isFinal: true, width: 50, height: 50 }, position: { x: 400, y: 300 } },
-            { data: { id: 'q2', label: 'Q2 (DEAD)', isInitial: false, isFinal: false, width: 50, height: 50 }, position: { x: 400, y: 500 } },
-            { data: { id: 'e1', source: 'q0', target: 'q1', label: '0' } },
-            { data: { id: 'e2', source: 'q0', target: 'q2', label: '1' } },
-            { data: { id: 'e3', source: 'q1', target: 'q1', label: '0, 1' } },
-            { data: { id: 'e4', source: 'q2', target: 'q2', label: '0, 1' } },
-        ];
+      newElements = [
+        { data: { id: 'q0', label: 'Q0', isInitial: true, isFinal: false, width: 50, height: 50 }, position: { x: 200, y: 300 } },
+        { data: { id: 'q1', label: 'Q1', isInitial: false, isFinal: true, width: 50, height: 50 }, position: { x: 400, y: 300 } },
+        { data: { id: 'q2', label: 'Q2 (DEAD)', isInitial: false, isFinal: false, width: 50, height: 50 }, position: { x: 400, y: 500 } },
+        { data: { id: 'e1', source: 'q0', target: 'q1', label: '0' } },
+        { data: { id: 'e2', source: 'q0', target: 'q2', label: '1' } },
+        { data: { id: 'e3', source: 'q1', target: 'q1', label: '0, 1' } },
+        { data: { id: 'e4', source: 'q2', target: 'q2', label: '0, 1' } },
+      ];
     } else if (type === 'ends') {
-        newElements = [
-            { data: { id: 'q0', label: 'Q0', isInitial: true, isFinal: false, width: 50, height: 50 }, position: { x: 200, y: 300 } },
-            { data: { id: 'q1', label: 'Q1', isInitial: false, isFinal: true, width: 50, height: 50 }, position: { x: 500, y: 300 } },
-            { data: { id: 'e1', source: 'q0', target: 'q1', label: '1' } },
-            { data: { id: 'e2', source: 'q0', target: 'q0', label: '0' } },
-            { data: { id: 'e3', source: 'q1', target: 'q1', label: '1' } },
-            { data: { id: 'e4', source: 'q1', target: 'q0', label: '0' } },
-        ];
+      newElements = [
+        { data: { id: 'q0', label: 'Q0', isInitial: true, isFinal: false, width: 50, height: 50 }, position: { x: 200, y: 300 } },
+        { data: { id: 'q1', label: 'Q1', isInitial: false, isFinal: true, width: 50, height: 50 }, position: { x: 500, y: 300 } },
+        { data: { id: 'e1', source: 'q0', target: 'q1', label: '1' } },
+        { data: { id: 'e2', source: 'q0', target: 'q0', label: '0' } },
+        { data: { id: 'e3', source: 'q1', target: 'q1', label: '1' } },
+        { data: { id: 'e4', source: 'q1', target: 'q0', label: '0' } },
+      ];
     } else if (type === 'parity') {
-        newElements = [
-            { data: { id: 'q0', label: 'EVEN', isInitial: true, isFinal: true, width: 50, height: 50 }, position: { x: 200, y: 350 } },
-            { data: { id: 'q1', label: 'ODD', isInitial: false, isFinal: false, width: 50, height: 50 }, position: { x: 500, y: 350 } },
-            { data: { id: 'e1', source: 'q0', target: 'q1', label: '1' } },
-            { data: { id: 'e2', source: 'q1', target: 'q0', label: '1' } },
-            { data: { id: 'e3', source: 'q0', target: 'q0', label: '0' } },
-            { data: { id: 'e4', source: 'q1', target: 'q1', label: '0' } },
-        ];
+      newElements = [
+        { data: { id: 'q0', label: 'EVEN', isInitial: true, isFinal: true, width: 50, height: 50 }, position: { x: 200, y: 350 } },
+        { data: { id: 'q1', label: 'ODD', isInitial: false, isFinal: false, width: 50, height: 50 }, position: { x: 500, y: 350 } },
+        { data: { id: 'e1', source: 'q0', target: 'q1', label: '1' } },
+        { data: { id: 'e2', source: 'q1', target: 'q0', label: '1' } },
+        { data: { id: 'e3', source: 'q0', target: 'q0', label: '0' } },
+        { data: { id: 'e4', source: 'q1', target: 'q1', label: '0' } },
+      ];
     }
     setElements(newElements);
     setShowExamples(false);
@@ -258,13 +258,13 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const nodes = elements.filter(e => !e.data.source);
     let curr = nodes.find(n => n.data.isInitial);
     if (!curr) { alert("Mark an Initial State first."); return; }
-    
+
     const steps = [];
     const inputChars = inputString.split('');
     for (const char of inputChars) {
       const nextEdge = edges.find(e => {
-          if (e.data.source !== curr?.data.id) return false;
-          return e.data.label.split(',').map((s: string) => s.trim()).includes(char);
+        if (e.data.source !== curr?.data.id) return false;
+        return e.data.label.split(',').map((s: string) => s.trim()).includes(char);
       });
       if (!nextEdge) break;
       const next = nodes.find(n => n.data.id === nextEdge.data.target);
@@ -280,12 +280,12 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   useEffect(() => {
     let interval: any;
     if (isPlaying) {
-        interval = setInterval(() => {
-            setCurrentStepIndex(p => {
-                if (p >= simulationSteps.length) { setIsPlaying(false); return p; }
-                return p + 1;
-            });
-        }, 650);
+      interval = setInterval(() => {
+        setCurrentStepIndex(p => {
+          if (p >= simulationSteps.length) { setIsPlaying(false); return p; }
+          return p + 1;
+        });
+      }, 650);
     }
     return () => clearInterval(interval);
   }, [isPlaying, simulationSteps.length]);
@@ -336,7 +336,7 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   currentEdges.forEach(e => { e.data.label.split(',').map((s: string) => s.trim()).forEach((c: string) => { if (c) alphabetSet.add(c); }); });
 
   const finished = currentStepIndex === simulationSteps.length && simulationSteps.length > 0;
-  const lastStateId = simulationSteps.length > 0 ? (currentStepIndex === simulationSteps.length ? simulationSteps[currentStepIndex-1].to : simulationSteps[currentStepIndex].from) : null;
+  const lastStateId = simulationSteps.length > 0 ? (currentStepIndex === simulationSteps.length ? simulationSteps[currentStepIndex - 1].to : simulationSteps[currentStepIndex].from) : null;
   const isAccepted = finished && currentNodes.find(n => n.data.id === lastStateId)?.data.isFinal;
 
   return (
@@ -348,13 +348,13 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
       <AnimatePresence>
         {errorMessage && (
-            <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-red-500 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl font-black uppercase text-[10px] tracking-widest cursor-pointer" onClick={() => setErrorMessage(null)}>
-                <AlertCircle size={16} /> {errorMessage}
-            </motion.div>
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-red-500 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl font-black uppercase text-[10px] tracking-widest cursor-pointer" onClick={() => setErrorMessage(null)}>
+            <AlertCircle size={16} /> {errorMessage}
+          </motion.div>
         )}
       </AnimatePresence>
 
-      <div className="h-16 w-full border-b border-white/5 flex items-center justify-between px-8 bg-black/40 backdrop-blur-xl z-50">
+      <div className="flex-none h-16 w-full border-b border-white/5 flex items-center justify-between px-8 bg-black/40 backdrop-blur-xl z-50">
         <div className="flex items-center gap-4">
           <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-full text-white/30 hover:text-[#C5A021] transition-all mr-2">
             <RotateCcw size={18} className="-scale-x-100" />
@@ -364,8 +364,8 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           <div className="text-[10px] font-black uppercase tracking-[0.4em] text-white/20">Archive Session / unit_01</div>
         </div>
         <div className="flex items-center gap-4">
-            <button onClick={() => setShowExamples(!showExamples)} className={`flex items-center gap-3 p-2 px-5 rounded-full text-[10px] uppercase font-black tracking-widest transition-all border ${showExamples ? 'bg-[#C5A021] text-black border-[#C5A021]' : 'bg-white/5 text-[#C5A021] border-[#C5A021]/30 hover:bg-[#C5A021]/10'}`}><BookOpen size={14} /> Blueprints</button>
-            <button onClick={() => cyRef.current?.layout({ name: 'cose', animate: true, padding: 80 }).run()} className="p-2 px-6 bg-white/5 border border-white/10 rounded-full text-[10px] uppercase font-black tracking-widest hover:bg-[#C5A021]/10 transition-all shadow-lg font-mono">Restore Balance</button>
+          <button onClick={() => setShowExamples(!showExamples)} className={`flex items-center gap-3 p-2 px-5 rounded-full text-[10px] uppercase font-black tracking-widest transition-all border ${showExamples ? 'bg-[#C5A021] text-black border-[#C5A021]' : 'bg-white/5 text-[#C5A021] border-[#C5A021]/30 hover:bg-[#C5A021]/10'}`}><BookOpen size={14} /> Blueprints</button>
+          <button onClick={() => cyRef.current?.layout({ name: 'cose', animate: true, padding: 80 }).run()} className="p-2 px-6 bg-white/5 border border-white/10 rounded-full text-[10px] uppercase font-black tracking-widest hover:bg-[#C5A021]/10 transition-all shadow-lg font-mono">Restore Balance</button>
         </div>
       </div>
 
@@ -391,7 +391,7 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         )}
       </AnimatePresence>
 
-      <div className="flex-grow flex relative">
+      <div className="flex-grow flex min-h-0 overflow-hidden relative">
         <div className="w-80 h-full border-r border-white/5 bg-black/20 backdrop-blur-3xl z-40 flex flex-col p-6 overflow-hidden">
           <div className="flex gap-2 mb-8 p-1 bg-white/5 rounded-xl border border-white/5">
             <button onClick={() => setActiveTab('inspector')} className={`flex-grow py-2 rounded-lg text-[10px] uppercase font-black tracking-widest transition-all ${activeTab === 'inspector' ? 'bg-[#C5A021] text-black shadow-lg shadow-[#C5A021]/20' : 'text-white/20 hover:text-white/40'}`}>Workbench</button>
@@ -410,19 +410,69 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                       </div>
                       {!elements.find(e => e.data.id === selectedId)?.data.source && (
                         <div className="space-y-3">
-                          <button onClick={startDraw} className="w-full flex items-center justify-center gap-3 p-4 bg-[#C5A021] text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-2xl font-mono"><ArrowUpRight size={16} /> Start transition</button>
+                          <button onClick={() => ehRef.current.start(cyRef.current?.getElementById(selectedId))} className="w-full flex items-center justify-center gap-3 p-4 bg-[#C5A021] text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-2xl font-mono"><ArrowUpRight size={16} /> Start transition</button>
                           <button onClick={() => addSelfLoop(selectedId)} className="w-full flex items-center justify-center gap-3 p-4 bg-white/5 border border-white/10 rounded-2xl font-black uppercase text-[10px] tracking-widest hover:bg-white/10 transition-all font-mono"><RefreshCcw size={16} /> Add Self-Loop</button>
                         </div>
                       )}
                       <button onClick={() => deleteItems(selectedId)} className="w-full mt-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-[9px] font-black uppercase tracking-widest text-red-500/60 hover:bg-red-500/20 transition-all font-mono">Delete Entry</button>
                     </div>
-                  ) : (<div className="space-y-6"><button onClick={() => addState()} className="w-full py-4 bg-[#C5A021] text-black rounded-2xl text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all shadow-2xl font-mono">+ Add New State</button></div>)}
+                  ) : (
+                    <div className="flex flex-col pt-4">
+                      <div className="mb-10 group">
+                        <div className="flex items-center gap-3 text-[#C5A021]/60 mb-4 group-focus-within:text-[#C5A021] transition-all">
+                          <Zap size={10} fill="currentColor" />
+                          <span className="text-[9px] font-black uppercase tracking-[0.6em]">Oracle Architect</span>
+                        </div>
+                        <div className="relative">
+                          <input placeholder="PROMPT THE MACHINE..." className="w-full bg-transparent border-b border-white/10 p-2 text-[11px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-[#C5A021]/50 placeholder:text-white/5 transition-all" />
+                          <button className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 hover:text-[#C5A021] transition-all"><ArrowUpRight size={16} /></button>
+                        </div>
+                      </div>
+                      
+                      <button onClick={() => addState()} className="w-full py-5 border border-[#C5A021]/30 hover:bg-[#C5A021] hover:text-black rounded-full text-[10px] font-black uppercase tracking-[0.4em] transition-all group overflow-hidden relative">
+                         <span className="relative z-10">+ Construct State</span>
+                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                      </button>
+                    </div>
+                  )}
                 </motion.div>
               ) : (
-                <motion.div key="tuple" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-6 text-white/60 font-mono text-[11px]">
-                  <h3 className="text-[10px] font-black tracking-[0.4em] text-[#C5A021] uppercase border-b border-white/5 pb-4">Formal Model (M)</h3>
-                  <div><span className="text-[#C5A021] font-bold tracking-widest mr-2">Q :</span> &#123; {currentNodes.map(n => n.data.label).join(', ')} &#125;</div>
-                  <div><span className="text-[#C5A021] font-bold tracking-widest mr-2">&Sigma;</span> &#123; {Array.from(alphabetSet).sort().join(', ') || '&empty;'} &#125;</div>
+                <motion.div key="tuple" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-12 text-white/50 font-mono text-[10px] pb-10 pt-4">
+                    <div className="space-y-6">
+                      <div>
+                        <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">States (Q)</div>
+                        <div className="pl-2 border-l border-white/5 leading-relaxed tracking-widest">
+                           {currentNodes.map(n => n.data.label).join(' // ')}
+                        </div>
+                      </div>
+                      
+                      <div>
+                        <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">Alphabet (&Sigma;)</div>
+                        <div className="pl-2 border-l border-white/5 tracking-widest">
+                           {Array.from(alphabetSet).sort().join(' / ') || 'EMPTY_SET'}
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">Function (&delta;)</div>
+                        <div className="max-h-48 overflow-y-auto pr-2 text-[9px] opacity-40 font-mono scrollbar-hide space-y-1 border-l border-white/5 pl-2">
+                          {currentEdges.map(e => (
+                            <div key={e.data.id}>({e.data.source}, {e.data.label}) &rarr; {e.data.target}</div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="pt-6 border-t border-white/5 flex flex-col gap-6">
+                        <div>
+                          <span className="text-[#C5A021]/40 font-bold tracking-[0.3em] uppercase block mb-1">Entry (q₀)</span> 
+                          <span className="text-white text-[12px] font-black italic tracking-tighter uppercase">{currentNodes.find(n => n.data.isInitial)?.data.label || 'N/A'}</span>
+                        </div>
+                        <div>
+                          <span className="text-[#C5A021]/40 font-bold tracking-[0.3em] uppercase block mb-1">Acceptance (F)</span> 
+                          <span className="text-white tracking-widest">{currentNodes.filter(n => n.data.isFinal).map(n => n.data.label).join(', ') || '&empty;'}</span>
+                        </div>
+                      </div>
+                    </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -443,7 +493,7 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           </AnimatePresence>
         </div>
       </div>
-      <div className="h-32 w-full border-t border-white/5 bg-black/60 backdrop-blur-3xl flex items-center px-12 gap-12 z-50">
+      <div className="flex-none h-32 w-full border-t border-white/5 bg-black/60 backdrop-blur-3xl flex items-center px-12 gap-12 z-50">
         <div className="flex flex-col gap-3 min-w-[280px]">
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-black uppercase tracking-[0.5em] text-white/20 flex items-center gap-2 font-mono"><ShieldCheck size={12} /> Analysis Hub</span>
@@ -464,15 +514,14 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           <button onClick={() => { setIsPlaying(false); setCurrentStepIndex(p => Math.max(0, p - 1)); }} className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 hover:border-[#C5A021]/40 transition-all font-mono text-white/40 hover:text-white"><RotateCcw size={20} /></button>
           <div className="flex items-center justify-center w-full max-w-[600px]">
             <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide py-2 px-1">
-                {inputString.split('').map((char, i) => (
+              {inputString.split('').map((char, i) => (
                 <div key={i} className={`min-w-[48px] h-14 rounded-xl flex items-center justify-center text-lg font-mono font-black border transition-all duration-300 ${i === currentStepIndex - 1 ? 'bg-[#C5A021] border-[#C5A021] scale-110 text-black shadow-2xl' : (i < currentStepIndex - 1 ? 'bg-white/10 text-white/40' : 'bg-white/5 text-white/10')}`}>{char}</div>
-                ))}
+              ))}
             </div>
           </div>
           <button onClick={() => setIsPlaying(!isPlaying)} className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all font-mono shadow-lg ${isPlaying ? 'bg-[#C5A021] text-black border-[#C5A021]' : 'bg-white/5 text-white border-white/10'}`}>
             {isPlaying ? <Pause size={20} /> : <Play size={20} />}
           </button>
-          <button onClick={() => { setIsPlaying(false); setCurrentStepIndex(p => Math.min(p + 1, simulationSteps.length)); }} className="w-14 h-14 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 hover:border-[#C5A021]/40 transition-all font-mono text-white/40 hover:text-white"><SkipForward size={20} /></button>
         </div>
       </div>
     </div>

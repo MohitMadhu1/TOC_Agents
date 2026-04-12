@@ -53,3 +53,13 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.2);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1), 0 0 20px rgba(197, 160, 33, 0.3);
 }
+
+@keyframes scan {
+  0% { transform: translateY(-100%); opacity: 0; }
+  50% { opacity: 0.5; }
+  100% { transform: translateY(200%); opacity: 0; }
+}
+
+.animate-scan {
+  animation: scan 4s linear infinite;
+}
