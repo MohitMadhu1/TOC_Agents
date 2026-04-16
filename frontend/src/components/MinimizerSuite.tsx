@@ -252,7 +252,7 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       dfaCyRef.current = cy;
       cy.minZoom(0.1); cy.maxZoom(4);
       if (ehRef.current) ehRef.current.destroy();
-      ehRef.current = cy.edgehandles({ canConnect: () => true, hoverDelay: 50 });
+      ehRef.current = (cy as any).edgehandles({ canConnect: () => true, hoverDelay: 50 });
       
       cy.off('ehcomplete');
       cy.on('ehcomplete', (v, s, t, edge) => { 
@@ -400,7 +400,7 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
         <div className="w-1/2 h-full bg-[#000816] relative border-l border-white/10 overflow-hidden">
             <div className="absolute top-6 left-6 z-20 px-4 py-2 bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] text-[#00FF88]">Optimized DFA</div>
-            <CytoscapeComponent elements={minElements} stylesheet={stylesheet} style={{ width: '100%', height: '100%' }} cy={(cy) => minCyRef.current = cy} />
+            <CytoscapeComponent elements={minElements} stylesheet={stylesheet} style={{ width: '100%', height: '100%' }} cy={(cy: any) => minCyRef.current = cy} />
             
             <div className="absolute bottom-6 right-6 w-80 max-h-72 bg-black/60 backdrop-blur-3xl border border-white/5 rounded-2xl p-6 overflow-hidden flex flex-col shadow-2xl">
                 <h3 className="text-[10px] font-black text-[#C5A021] uppercase tracking-[0.4em] mb-4 flex items-center gap-2"><Grid3X3 size={14} /> Myhill-Nerode Matrix</h3>

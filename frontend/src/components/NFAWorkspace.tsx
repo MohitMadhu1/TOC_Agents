@@ -288,7 +288,7 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     
     // NFA: SET OF ACTIVE STATES WITH PARENT TRACKING
     const steps: { id: string, parents: string[] }[][] = [];
-    let currentSet = getEpsilonClosure([initialNode.data.id], edges).map(id => ({ id, parents: [] }));
+    let currentSet = getEpsilonClosure([initialNode.data.id!], edges).map(id => ({ id, parents: [] }));
     steps.push(currentSet);
 
     const inputChars = inputString.split('');
