@@ -116,7 +116,7 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             edges.filter(e => e.source === id).forEach(e => stack.push(e.target));
         }
     }
-    const reachableNodes = nodes.filter(n => reachable.has(n.id));
+    const reachableNodes = nodes.filter(n => reachable.has(n.id as string));
     const reachableEdges = edges.filter(e => reachable.has(e.source) && reachable.has(e.target));
 
     // 2. Table-Filling Algorithm
@@ -131,7 +131,7 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         for (let j = i + 1; j < reachableNodes.length; j++) {
             const p = reachableNodes[i];
             const q = reachableNodes[j];
-            if (p.isFinal !== q.isFinal) distTable[getPairKey(p.id, q.id)] = true;
+            if (p.isFinal !== q.isFinal) distTable[getPairKey(p.id as string, q.id as string)] = true;
         }
     }
 
