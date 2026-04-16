@@ -33,8 +33,11 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
+    "@types/cytoscape-dagre": "^2.3.4",
+    "@types/dagre": "^0.7.54",
     "@types/node": "^24.12.2",
     "@types/react": "^19.2.14",
+    "@types/react-cytoscapejs": "^1.2.6",
     "@types/react-dom": "^19.2.3",
     "@vercel/node": "^5.7.7",
     "@vitejs/plugin-react": "^6.0.1",

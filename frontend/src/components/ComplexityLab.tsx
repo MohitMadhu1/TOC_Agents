@@ -110,7 +110,7 @@ const ComplexityLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               <div className="w-[45%] shrink-0 flex items-center justify-center relative border-r border-white/5 bg-black/5">
                 <div className="relative flex items-center justify-center" style={{ width: 400, height: 400 }}>
                   {/* Draw rings from outside in */}
-                  {[...CLASSES].reverse().map((cls, ri) => (
+                  {[...CLASSES].reverse().map((cls) => (
                     <motion.button
                       key={cls.id}
                       onClick={() => setSelected(cls)}
