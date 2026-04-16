@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Share2, Zap, ArrowRight, Layers, Trash2, RotateCcw, Box, GitBranch, Terminal } from 'lucide-react';
+import { ChevronLeft, Share2, Zap, ArrowRight, Layers, Trash2, RotateCcw, Box, GitBranch, Terminal, Loader2, AlertCircle } from 'lucide-react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import cytoscape from 'cytoscape';
+import { AIService } from '../utils/aiService';
 // edgehandles/dagre are registered globally in main.tsx
 
 const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
@@ -17,6 +18,8 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [selectedDfaId, setSelectedDfaId] = useState<string | null>(null);
   const [dfaMenu, setDfaMenu] = useState<{ x: number, y: number, id: string } | null>(null);
   const [oracleInput, setOracleInput] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showDfaBlueprints, setShowDfaBlueprints] = useState(false);
   
   const cyRef = useRef<cytoscape.Core | null>(null);
@@ -322,6 +325,40 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     }, 50);
   };
 
+  const handleOracleInquiry = async () => {
+    if (!oracleInput.trim() || isGenerating) return;
+    
+    setIsGenerating(true);
+    try {
+      const ai = new AIService();
+      const result = await ai.generateMachine(oracleInput, 'dfa');
+      
+      const newNodes = result.nodes.map(n => ({
+        data: { id: n.id, label: n.label, isInitial: n.isInitial, isFinal: n.isFinal, width: 50, height: 50 },
+        position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 }
+      }));
+
+      const newEdges = result.edges.map((e, idx) => ({
+        data: { id: `edge-${idx}-${Date.now()}`, source: e.source, target: e.target, label: e.label }
+      }));
+
+      setDfaElements([...newNodes, ...newEdges]);
+      setOracleInput('');
+      
+      setTimeout(() => {
+        if (cyDfaRef.current) {
+          cyDfaRef.current.layout({ name: 'cose', animate: true }).run();
+        }
+      }, 200);
+
+    } catch (error: any) {
+      console.error("Oracle Error:", error);
+      setErrorMessage(error.message || "Oracle failed to synthesize the machine.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const onDfaCyReady = (cy: cytoscape.Core) => {
     cyDfaRef.current = cy;
     cy.minZoom(0.1); cy.maxZoom(4);
@@ -349,6 +386,15 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   return (
     <div className="w-full h-screen bg-[#000816] flex flex-col text-white font-sans overflow-hidden relative">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#001a33_0%,#000816_100%)] opacity-40 pointer-events-none" />
+      
+      <AnimatePresence>
+        {errorMessage && (
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute top-20 left-1/2 -translate-x-1/2 z-[200] bg-red-500 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl font-black uppercase text-[10px] tracking-widest cursor-pointer" onClick={() => setErrorMessage(null)}>
+            <AlertCircle size={16} /> {errorMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="h-16 border-b border-white/5 bg-black/40 backdrop-blur-xl px-8 flex items-center justify-between z-50">
         <div className="flex items-center gap-6">
@@ -443,8 +489,22 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 <div className="w-full px-12 py-6 bg-black/20 border-b border-white/5">
                     <div className="max-w-4xl mx-auto relative flex bg-white/5 p-2 rounded-3xl border border-white/10 focus-within:border-[#C5A021]/50 transition-all">
                         <div className="flex items-center gap-3 px-4 text-[#C5A021]/40"><Terminal size={20} /><span className="text-[10px] uppercase font-black tracking-widest">Logic Oracle :</span></div>
-                        <input value={oracleInput} onChange={e => setOracleInput(e.target.value)} placeholder="Type natural language rules (e.g. 'Accepts strings ending in 01')..." className="flex-grow bg-transparent p-4 text-sm font-medium focus:outline-none placeholder:text-white/10" />
-                        <button className="px-10 bg-[#C5A021] text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-xl">Process</button>
+                        <input 
+                            value={oracleInput} 
+                            onChange={e => setOracleInput(e.target.value)} 
+                            onKeyDown={e => e.key === 'Enter' && handleOracleInquiry()}
+                            placeholder={isGenerating ? "CONSULTING ORACLE..." : "Type natural language rules (e.g. 'Accepts strings ending in 01')..."} 
+                            disabled={isGenerating}
+                            className="flex-grow bg-transparent p-4 text-sm font-medium focus:outline-none placeholder:text-white/10" 
+                        />
+                        <button 
+                            onClick={handleOracleInquiry} 
+                            disabled={isGenerating}
+                            className="px-10 bg-[#C5A021] text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-xl disabled:opacity-50 flex items-center gap-2"
+                        >
+                            {isGenerating && <Loader2 size={14} className="animate-spin" />}
+                            {isGenerating ? "Processing" : "Process"}
+                        </button>
                     </div>
                 </div>
 

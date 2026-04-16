@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, Terminal, Zap, Search, Sparkles, Wand2, Info, Layers, Box } from 'lucide-react';
+import { ChevronLeft, Terminal, Zap, Search, Sparkles, Wand2, Info, Layers, Box, Loader2, ArrowUpRight, AlertCircle } from 'lucide-react';
+import { AIService } from '../utils/aiService';
 
 const RegexPlayground: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [regex, setRegex] = useState('');
   const [generatedStrings, setGeneratedStrings] = useState<string[]>([]);
   const [isInfinite, setIsInfinite] = useState(false);
   const [optimizerActive, setOptimizerActive] = useState(false);
+  const [isOptimizing, setIsOptimizing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Formal TOC Language Generator
   useEffect(() => {
@@ -110,9 +113,40 @@ const RegexPlayground: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     }
   }, [regex]);
 
+  const handleOptimize = async () => {
+    if (!regex.trim() || isOptimizing) return;
+    setIsOptimizing(true);
+    setErrorMessage(null);
+    try {
+      const ai = new AIService();
+      // We pass the current regex as both prompt and current value
+      const newRegex = await ai.optimizeRegex("Minimize and simplify this formal regular expression as much as possible while maintaining the same language.", regex);
+      setRegex(newRegex);
+    } catch (err: any) {
+      setErrorMessage(err.message || "Oracle failed to optimize.");
+    } finally {
+      setIsOptimizing(false);
+    }
+  };
+
   return (
     <div className="w-full h-screen bg-[#000816] flex flex-col text-white font-sans overflow-hidden relative">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,#001a33_0%,#000816_100%)] opacity-40 pointer-events-none" />
+      
+      <AnimatePresence>
+        {errorMessage && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -20 }} 
+            className="absolute top-20 left-1/2 -translate-x-1/2 z-[200] bg-red-500 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl font-black uppercase text-[10px] tracking-widest cursor-pointer" 
+            onClick={() => setErrorMessage(null)}
+          >
+            <AlertCircle size={16} /> {errorMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Header */}
       <div className="h-16 border-b border-white/5 bg-black/40 backdrop-blur-xl px-8 flex items-center justify-between z-50">
         <div className="flex items-center gap-6">
@@ -149,17 +183,27 @@ const RegexPlayground: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         value={regex}
                         onChange={(e) => setRegex(e.target.value)}
                         placeholder="e.g. (a+b)*.a"
-                        className="w-full bg-transparent text-5xl font-black italic tracking-tighter text-white focus:outline-none placeholder:text-white/5 pr-20"
+                        className="w-full bg-transparent text-5xl font-black italic tracking-tighter text-white focus:outline-none placeholder:text-white/5 pr-48"
                     />
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 flex gap-4 opacity-40">
-                        <kbd className="px-3 py-1 bg-white/5 border border-white/10 rounded text-xs font-mono">+ Union</kbd>
-                        <kbd className="px-3 py-1 bg-white/5 border border-white/10 rounded text-xs font-mono">* Star</kbd>
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 flex items-center gap-6">
+                        <div className="flex gap-4 opacity-40">
+                            <kbd className="px-3 py-1 bg-white/5 border border-white/10 rounded text-xs font-mono">+ Union</kbd>
+                            <kbd className="px-3 py-1 bg-white/5 border border-white/10 rounded text-xs font-mono">* Star</kbd>
+                        </div>
+                        <button 
+                            onClick={handleOptimize}
+                            disabled={isOptimizing}
+                            className={`p-4 rounded-2xl bg-[#C5A021]/10 border border-[#C5A021]/30 text-[#C5A021] transition-all ${isOptimizing ? 'animate-spin' : 'hover:bg-[#C5A021] hover:text-black shadow-xl hover:shadow-[#C5A021]/20'}`}
+                            title="Consult Logic Oracle"
+                        >
+                            {isOptimizing ? <Loader2 size={24} /> : <Zap size={24} fill="currentColor" />}
+                        </button>
                     </div>
                 </div>
             </div>
 
             {/* Matcher Area (Now Language Generator) */}
-            <div className="flex-grow flex flex-col bg-white/[0.02] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-inner relative">
+            <div className="flex-grow flex-col bg-white/[0.02] border border-white/10 rounded-[2.5rem] overflow-hidden shadow-inner relative">
                 <div className="p-6 border-b border-white/5 flex justify-between items-center bg-black/20">
                     <div className="flex items-center gap-3 text-white/40">
                         <Layers size={16} />
@@ -212,12 +256,11 @@ const RegexPlayground: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <h3 className="text-sm font-black uppercase tracking-widest italic">Algebraic Agent</h3>
                     </div>
                     <div className="flex-grow flex flex-col gap-4 overflow-y-auto">
-                        <div className="bg-white/5 border border-white/5 rounded-2xl p-5 space-y-3 hover:border-[#C5A021]/30 transition-all cursor-pointer group">
-                             <div className="text-[10px] font-black uppercase tracking-widest text-white/20">Detected Inefficiency</div>
-                             <code className="block text-sm text-[#C5A021] font-mono group-hover:scale-105 transition-transform">(a*)*</code>
-                             <div className="flex items-center gap-2 text-[9px] font-medium text-white/40">
-                                <Zap size={10} /> Simplify to <span className="text-white">a*</span>
-                             </div>
+                        <div className="p-6 bg-white/[0.03] border border-white/5 rounded-3xl space-y-4">
+                            <div className="text-[10px] font-black uppercase tracking-[0.4em] text-[#C5A021] mb-2">Current Insight</div>
+                            <p className="text-[11px] text-white/40 leading-relaxed">
+                                The algebraic agent is monitoring your input. Click the <span className="text-[#C5A021]">Zap</span> icon in the console to trigger an automated minimization based on Kleene's algebra.
+                            </p>
                         </div>
                         <div className="bg-white/5 border border-white/5 rounded-2xl p-5 space-y-3">
                              <div className="text-[10px] font-black uppercase tracking-widest text-[#C5A021]/40 flex items-center gap-2 underline decoration-dashed underline-offset-4">
@@ -230,9 +273,6 @@ const RegexPlayground: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                              </ul>
                         </div>
                     </div>
-                    <button className="w-full py-4 bg-[#C5A021] text-black font-black uppercase text-[10px] tracking-widest rounded-xl hover:scale-105 transition-all flex items-center justify-center gap-3 shadow-xl">
-                        Apply Simplification <Wand2 size={14} />
-                    </button>
                     <div className="absolute -left-4 top-1/2 -translate-y-1/2 h-20 w-1 bg-[#C5A021] rounded-full blur-sm" />
                 </motion.div>
             )}

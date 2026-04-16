@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import cytoscape from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
-import { RotateCcw, SkipForward, Zap, Trash2, ShieldCheck, Target, ArrowUpRight, RefreshCcw, Settings2, AlertCircle, LayoutGrid, BookOpen, Play, Pause, CheckCircle2, XCircle, GitBranch } from 'lucide-react';
+import { RotateCcw, SkipForward, Zap, Trash2, ShieldCheck, Target, ArrowUpRight, RefreshCcw, Settings2, AlertCircle, LayoutGrid, BookOpen, Play, Pause, CheckCircle2, XCircle, GitBranch, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AIService } from '../utils/aiService';
 
 // Plugin registered globally in main.tsx
 
@@ -12,15 +13,17 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     { data: { id: 'q0', label: 'Q0', isInitial: true, isFinal: false, width: 50, height: 50 }, position: { x: 300, y: 300 } }
   ]);
   const [inputString, setInputString] = useState('');
-  const [simulationSteps, setSimulationSteps] = useState<{ id: string, parents: string[] }[][]>([]); // Array of active state object sets
+  const [simulationSteps, setSimulationSteps] = useState<{ id: string, parents: string[] }[][]>([]); 
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [menu, setMenu] = useState<{ x: number, y: number, id: string, type: 'node' | 'edge' } | null>(null);
+  const [activeTab, setActiveTab] = useState<'inspector' | 'quantum' | 'tuple'>('inspector');
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'inspector' | 'tuple' | 'quantum'>('inspector');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showExamples, setShowExamples] = useState(false);
-  
+  const [oracleInput, setOracleInput] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+
   const cyRef = useRef<cytoscape.Core | null>(null);
   const ehRef = useRef<any>(null);
 
@@ -140,6 +143,41 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         }
       }
     ];
+
+  const handleOracleInquiry = async () => {
+    if (!oracleInput.trim() || isGenerating) return;
+    
+    setIsGenerating(true);
+    setErrorMessage(null);
+    try {
+      const ai = new AIService();
+      const result = await ai.generateMachine(oracleInput, 'nfa');
+      
+      const newNodes = result.nodes.map(n => ({
+        data: { id: n.id, label: n.label, isInitial: n.isInitial, isFinal: n.isFinal, width: 50, height: 50 },
+        position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 }
+      }));
+
+      const newEdges = result.edges.map((e, idx) => ({
+        data: { id: `edge-${idx}-${Date.now()}`, source: e.source, target: e.target, label: e.label }
+      }));
+
+      setElements([...newNodes, ...newEdges]);
+      setOracleInput('');
+      
+      setTimeout(() => {
+        if (cyRef.current) {
+          cyRef.current.layout({ name: 'cose', animate: true }).run();
+        }
+      }, 200);
+
+    } catch (error: any) {
+      console.error("Oracle Error:", error);
+      setErrorMessage(error.message || "Oracle failed to synthesize the machine.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
   const addState = (pos?: { x: number, y: number }) => {
     setElements(prev => {
@@ -393,7 +431,7 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const successPathNodes = getSuccessPaths();
 
   return (
-    <div className="w-full h-screen bg-[#000816] flex flex-col overflow-hidden text-white font-sans select-none relative">
+    <div className="w-full h-screen bg-[#000816] flex flex-col overflow-hidden text-white font-sans relative">
       <style>{`
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -467,8 +505,20 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                           <span className="text-[9px] font-black uppercase tracking-[0.6em]">Oracle Nexus</span>
                         </div>
                         <div className="relative">
-                          <input placeholder="NEURAL PROMPT..." className="w-full bg-transparent border-b border-white/10 p-2 text-[11px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-[#C5A021]/50 placeholder:text-white/5 transition-all" />
-                          <button className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 hover:text-[#C5A021] transition-all"><ArrowUpRight size={16} /></button>
+                          <input 
+                            value={oracleInput}
+                            onChange={(e) => setOracleInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleOracleInquiry()}
+                            placeholder={isGenerating ? "CONSULTING ORACLE..." : "NEURAL PROMPT..."} 
+                            disabled={isGenerating}
+                            className="w-full bg-transparent border-b border-white/10 p-2 text-[11px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-[#C5A021]/50 placeholder:text-white/5 transition-all disabled:opacity-50" 
+                          />
+                          <button 
+                            onClick={handleOracleInquiry}
+                            className={`absolute right-0 top-1/2 -translate-y-1/2 transition-all ${isGenerating ? 'text-[#C5A021] animate-spin' : 'text-white/20 hover:text-[#C5A021]'}`}
+                          >
+                            {isGenerating ? <Loader2 size={16} /> : <ArrowUpRight size={16} />}
+                          </button>
                         </div>
                       </div>
                       

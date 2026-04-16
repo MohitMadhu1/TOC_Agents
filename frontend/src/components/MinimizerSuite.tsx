@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import cytoscape from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
-import { RotateCcw, Share2, Zap, Trash2, ShieldCheck, Target, ArrowUpRight, RefreshCcw, Settings2, AlertCircle, LayoutGrid, BookOpen, Play, Pause, CheckCircle2, XCircle, ChevronRight, Terminal, Grid3X3 } from 'lucide-react';
+import { RotateCcw, Share2, Zap, Trash2, ShieldCheck, Target, ArrowUpRight, RefreshCcw, Settings2, AlertCircle, LayoutGrid, BookOpen, Play, Pause, CheckCircle2, XCircle, ChevronRight, Terminal, Grid3X3, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AIService } from '../utils/aiService';
 
 // Plugin registered globally in main.tsx
 
@@ -17,6 +18,8 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [menu, setMenu] = useState<{ x: number, y: number, id: string, type: 'node' | 'edge' } | null>(null);
   const [oracleInput, setOracleInput] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showBlueprints, setShowBlueprints] = useState(false);
 
   const dfaCyRef = useRef<cytoscape.Core | null>(null);
@@ -211,6 +214,40 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setTimeout(() => minCyRef.current?.layout({ name: 'cose', animate: true }).run(), 100);
   };
 
+  const handleOracleInquiry = async () => {
+    if (!oracleInput.trim() || isGenerating) return;
+    
+    setIsGenerating(true);
+    try {
+      const ai = new AIService();
+      const result = await ai.generateMachine(oracleInput, 'dfa');
+      
+      const newNodes = result.nodes.map(n => ({
+        data: { id: n.id, label: n.label, isInitial: n.isInitial, isFinal: n.isFinal, width: 50, height: 50 },
+        position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 }
+      }));
+
+      const newEdges = result.edges.map((e, idx) => ({
+        data: { id: `edge-${idx}-${Date.now()}`, source: e.source, target: e.target, label: e.label }
+      }));
+
+      setDfaElements([...newNodes, ...newEdges]);
+      setOracleInput('');
+      
+      setTimeout(() => {
+        if (dfaCyRef.current) {
+          dfaCyRef.current.layout({ name: 'cose', animate: true }).run();
+        }
+      }, 200);
+
+    } catch (error: any) {
+      console.error("Oracle Error:", error);
+      setErrorMessage(error.message || "Oracle failed to synthesize the machine.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const onCyReady = (cy: cytoscape.Core) => {
       dfaCyRef.current = cy;
       cy.minZoom(0.1); cy.maxZoom(4);
@@ -284,6 +321,14 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <button onClick={minimizeDFA} className="px-8 py-3 bg-[#C5A021] text-black rounded-full font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-[0_0_20px_rgba(197,160,33,0.3)] flex items-center gap-2 font-mono"><Zap size={14} /> Optimize DFA</button>
         </div>
       </div>
+      
+      <AnimatePresence>
+        {errorMessage && (
+          <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="absolute top-20 left-1/2 -translate-x-1/2 z-[100] bg-red-500 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl font-black uppercase text-[10px] tracking-widest cursor-pointer" onClick={() => setErrorMessage(null)}>
+            <AlertCircle size={16} /> {errorMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {showBlueprints && (
@@ -303,10 +348,19 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <input 
                 value={oracleInput} 
                 onChange={(e) => setOracleInput(e.target.value)}
-                placeholder="Type natural language rules for minimal DFA (e.g. 'Contains 01')..." 
+                onKeyDown={(e) => e.key === 'Enter' && handleOracleInquiry()}
+                placeholder={isGenerating ? "CONSULTING ORACLE..." : "Type natural language rules for minimal DFA (e.g. 'Contains 01')..."} 
+                disabled={isGenerating}
                 className="flex-grow bg-transparent p-4 text-sm font-medium focus:outline-none placeholder:text-white/10"
             />
-            <button className="px-10 bg-[#C5A021] text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-xl">Process</button>
+            <button 
+                onClick={handleOracleInquiry} 
+                disabled={isGenerating}
+                className="px-10 bg-[#C5A021] text-black rounded-2xl font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-all shadow-xl disabled:opacity-50 flex items-center gap-2"
+            >
+                {isGenerating && <Loader2 size={14} className="animate-spin" />}
+                {isGenerating ? "Processing" : "Process"}
+            </button>
         </div>
       </div>
 

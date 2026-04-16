@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import CytoscapeComponent from 'react-cytoscapejs';
 import cytoscape from 'cytoscape';
 import edgehandles from 'cytoscape-edgehandles';
-import { RotateCcw, SkipForward, Zap, Trash2, ShieldCheck, Target, ArrowUpRight, RefreshCcw, Settings2, AlertCircle, LayoutGrid, BookOpen, Play, Pause, CheckCircle2, XCircle } from 'lucide-react';
+import { RotateCcw, SkipForward, Zap, Trash2, ShieldCheck, Target, ArrowUpRight, RefreshCcw, Settings2, AlertCircle, LayoutGrid, BookOpen, Play, Pause, CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { AIService } from '../utils/aiService';
 
 // edgehandles/dagre are registered globally in main.tsx
 
@@ -20,6 +21,8 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [activeTab, setActiveTab] = useState<'inspector' | 'tuple'>('inspector');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [showExamples, setShowExamples] = useState(false);
+  const [oracleInput, setOracleInput] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const cyRef = useRef<cytoscape.Core | null>(null);
   const ehRef = useRef<any>(null);
@@ -210,6 +213,54 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     });
   };
 
+  const handleOracleInquiry = async () => {
+    if (!oracleInput.trim() || isGenerating) return;
+    
+    setIsGenerating(true);
+    try {
+      const ai = new AIService();
+      const result = await ai.generateMachine(oracleInput, 'dfa');
+      
+      // Transform AI nodes/edges to Cytoscape elements
+      const newNodes = result.nodes.map(n => ({
+        data: { 
+          id: n.id, 
+          label: n.label, 
+          isInitial: n.isInitial, 
+          isFinal: n.isFinal, 
+          width: 50, 
+          height: 50 
+        },
+        position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 }
+      }));
+
+      const newEdges = result.edges.map((e, idx) => ({
+        data: { 
+          id: `edge-${idx}-${Date.now()}`, 
+          source: e.source, 
+          target: e.target, 
+          label: e.label 
+        }
+      }));
+
+      setElements([...newNodes, ...newEdges]);
+      setOracleInput('');
+      
+      // Trigger layout
+      setTimeout(() => {
+        if (cyRef.current) {
+          cyRef.current.layout({ name: 'cose', animate: true }).run();
+        }
+      }, 200);
+
+    } catch (error: any) {
+      console.error("Oracle Error:", error);
+      setErrorMessage(error.message || "Oracle failed to synthesize the machine.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const loadExample = (type: 'starts' | 'ends' | 'parity') => {
     let newElements: cytoscape.ElementDefinition[] = [];
     if (type === 'starts') {
@@ -340,7 +391,7 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const isAccepted = finished && currentNodes.find(n => n.data.id === lastStateId)?.data.isFinal;
 
   return (
-    <div className="w-full h-screen bg-[#000816] flex flex-col overflow-hidden text-white font-sans select-none relative">
+    <div className="w-full h-screen bg-[#000816] flex flex-col overflow-hidden text-white font-sans relative">
       <style>{`
         .scrollbar-hide::-webkit-scrollbar { display: none; }
         .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -424,55 +475,68 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                           <span className="text-[9px] font-black uppercase tracking-[0.6em]">Oracle Architect</span>
                         </div>
                         <div className="relative">
-                          <input placeholder="PROMPT THE MACHINE..." className="w-full bg-transparent border-b border-white/10 p-2 text-[11px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-[#C5A021]/50 placeholder:text-white/5 transition-all" />
-                          <button className="absolute right-0 top-1/2 -translate-y-1/2 text-white/20 hover:text-[#C5A021] transition-all"><ArrowUpRight size={16} /></button>
+                          <input 
+                            value={oracleInput}
+                            onChange={(e) => setOracleInput(e.target.value)}
+                            onKeyDown={(e) => e.key === 'Enter' && handleOracleInquiry()}
+                            placeholder={isGenerating ? "CONSULTING ORACLE..." : "PROMPT THE MACHINE..."} 
+                            disabled={isGenerating}
+                            className="w-full bg-transparent border-b border-white/10 p-2 text-[11px] font-black uppercase tracking-widest text-white focus:outline-none focus:border-[#C5A021]/50 placeholder:text-white/5 transition-all disabled:opacity-50" 
+                          />
+                          <button 
+                            onClick={handleOracleInquiry}
+                            disabled={isGenerating}
+                            className={`absolute right-0 top-1/2 -translate-y-1/2 transition-all ${isGenerating ? 'text-[#C5A021] animate-spin' : 'text-white/20 hover:text-[#C5A021]'}`}
+                          >
+                            {isGenerating ? <Loader2 size={16} /> : <ArrowUpRight size={16} />}
+                          </button>
                         </div>
                       </div>
-                      
+
                       <button onClick={() => addState()} className="w-full py-5 border border-[#C5A021]/30 hover:bg-[#C5A021] hover:text-black rounded-full text-[10px] font-black uppercase tracking-[0.4em] transition-all group overflow-hidden relative">
-                         <span className="relative z-10">+ Construct State</span>
-                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
+                        <span className="relative z-10">+ Construct State</span>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
                       </button>
                     </div>
                   )}
                 </motion.div>
               ) : (
                 <motion.div key="tuple" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} className="space-y-12 text-white/50 font-mono text-[10px] pb-10 pt-4">
-                    <div className="space-y-6">
-                      <div>
-                        <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">States (Q)</div>
-                        <div className="pl-2 border-l border-white/5 leading-relaxed tracking-widest">
-                           {currentNodes.map(n => n.data.label).join(' // ')}
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">Alphabet (&Sigma;)</div>
-                        <div className="pl-2 border-l border-white/5 tracking-widest">
-                           {Array.from(alphabetSet).sort().join(' / ') || 'EMPTY_SET'}
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">Function (&delta;)</div>
-                        <div className="max-h-48 overflow-y-auto pr-2 text-[9px] opacity-40 font-mono scrollbar-hide space-y-1 border-l border-white/5 pl-2">
-                          {currentEdges.map(e => (
-                            <div key={e.data.id}>({e.data.source}, {e.data.label}) &rarr; {e.data.target}</div>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="pt-6 border-t border-white/5 flex flex-col gap-6">
-                        <div>
-                          <span className="text-[#C5A021]/40 font-bold tracking-[0.3em] uppercase block mb-1">Entry (q₀)</span> 
-                          <span className="text-white text-[12px] font-black italic tracking-tighter uppercase">{currentNodes.find(n => n.data.isInitial)?.data.label || 'N/A'}</span>
-                        </div>
-                        <div>
-                          <span className="text-[#C5A021]/40 font-bold tracking-[0.3em] uppercase block mb-1">Acceptance (F)</span> 
-                          <span className="text-white tracking-widest">{currentNodes.filter(n => n.data.isFinal).map(n => n.data.label).join(', ') || '&empty;'}</span>
-                        </div>
+                  <div className="space-y-6">
+                    <div>
+                      <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">States (Q)</div>
+                      <div className="pl-2 border-l border-white/5 leading-relaxed tracking-widest">
+                        {currentNodes.map(n => n.data.label).join(' // ')}
                       </div>
                     </div>
+
+                    <div>
+                      <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">Alphabet (&Sigma;)</div>
+                      <div className="pl-2 border-l border-white/5 tracking-widest">
+                        {Array.from(alphabetSet).sort().join(' / ') || 'EMPTY_SET'}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-[9px] font-black tracking-[0.5em] text-[#C5A021] uppercase mb-3 opacity-80">Function (&delta;)</div>
+                      <div className="max-h-48 overflow-y-auto pr-2 text-[9px] opacity-40 font-mono scrollbar-hide space-y-1 border-l border-white/5 pl-2">
+                        {currentEdges.map(e => (
+                          <div key={e.data.id}>({e.data.source}, {e.data.label}) &rarr; {e.data.target}</div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="pt-6 border-t border-white/5 flex flex-col gap-6">
+                      <div>
+                        <span className="text-[#C5A021]/40 font-bold tracking-[0.3em] uppercase block mb-1">Entry (q₀)</span>
+                        <span className="text-white text-[12px] font-black italic tracking-tighter uppercase">{currentNodes.find(n => n.data.isInitial)?.data.label || 'N/A'}</span>
+                      </div>
+                      <div>
+                        <span className="text-[#C5A021]/40 font-bold tracking-[0.3em] uppercase block mb-1">Acceptance (F)</span>
+                        <span className="text-white tracking-widest">{currentNodes.filter(n => n.data.isFinal).map(n => n.data.label).join(', ') || '&empty;'}</span>
+                      </div>
+                    </div>
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>

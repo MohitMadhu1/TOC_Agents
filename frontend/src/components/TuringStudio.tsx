@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronLeft, Play, Square, FastForward, RotateCcw,
   Trash2, BookOpen, Plus, ChevronDown, ChevronUp,
-  CheckCircle, XCircle, Clock
+  CheckCircle, XCircle, Clock, Zap, Loader2, AlertCircle
 } from 'lucide-react';
 import AIProfessor from './AIProfessor';
+import { AIService } from '../utils/aiService';
 
 interface Transition {
   id: string;
@@ -141,6 +142,9 @@ const TuringStudio: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const [showLibrary, setShowLibrary] = useState(false);
   const [activeView, setActiveView] = useState<'transitions' | 'id_log'>('transitions');
   const [tapeInput, setTapeInput] = useState('');
+  const [oracleInput, setOracleInput] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const tapeRef = useRef<HTMLDivElement>(null);
   const isRunningRef = useRef(false);
@@ -250,6 +254,35 @@ const TuringStudio: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setStatus('idle');
   };
 
+  const handleOracleInquiry = async () => {
+    if (!oracleInput.trim() || isGenerating) return;
+    setIsGenerating(true);
+    setErrorMessage(null);
+    try {
+      const ai = new AIService();
+      const result = await ai.generateTM(oracleInput);
+      
+      // Convert result nodes/edges to TM transitions
+      const newTransitions: Transition[] = result.edges.map((e: any, idx: number) => ({
+        id: `ai-${idx}-${Date.now()}`,
+        fromState: e.source,
+        toState: e.target,
+        readSymbol: e.read,
+        writeSymbol: e.write,
+        move: e.move as 'L' | 'R' | 'S'
+      }));
+
+      setTransitions(newTransitions);
+      setOracleInput('');
+      handleReset();
+      setIdLog(['// Oracle synthesis complete. Transitions updated.']);
+    } catch (err: any) {
+      setErrorMessage(err.message || "Oracle failed to synthesize TM.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   const loadLib = (key: string) => {
     const lib = LIBRARIES[key];
     isRunningRef.current = false;
@@ -285,18 +318,53 @@ const TuringStudio: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const activeTransIdx = transitions.findIndex(t => t.fromState === state && t.readSymbol === (tape[head] || 'B'));
 
   return (
-    <div className="w-full h-screen bg-[#000816] flex flex-col text-white font-sans overflow-hidden relative select-none">
+    <div className="w-full h-screen bg-[#000816] flex flex-col text-white font-sans overflow-hidden relative">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,#001230_0%,#000816_60%)] pointer-events-none" />
 
+      <AnimatePresence>
+        {errorMessage && (
+          <motion.div 
+            initial={{ opacity: 0, y: -20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            exit={{ opacity: 0, y: -20 }} 
+            className="absolute top-20 left-1/2 -translate-x-1/2 z-[200] bg-red-500 text-white px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl font-black uppercase text-[10px] tracking-widest cursor-pointer" 
+            onClick={() => setErrorMessage(null)}
+          >
+            <AlertCircle size={16} /> {errorMessage}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* ── HEADER ── */}
-      <div className="h-14 shrink-0 border-b border-white/5 bg-black/40 backdrop-blur-xl px-6 flex items-center justify-between z-50">
-        <div className="flex items-center gap-4">
-          <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-all">
-            <ChevronLeft size={18} />
-          </button>
-          <h1 className="text-base font-black uppercase tracking-[0.2em] italic">
-            Station 5.1 / <span className="text-[#C5A021]">Turing Studio</span>
-          </h1>
+      <div className="h-16 shrink-0 border-b border-white/5 bg-black/40 backdrop-blur-xl px-6 flex items-center justify-between z-50">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <button onClick={onBack} className="p-2 hover:bg-white/5 rounded-full text-white/40 hover:text-white transition-all">
+              <ChevronLeft size={18} />
+            </button>
+            <h1 className="text-base font-black uppercase tracking-[0.2em] italic">
+              Station 5.1 / <span className="text-[#C5A021]">Turing Studio</span>
+            </h1>
+          </div>
+
+          <div className="flex bg-white/5 rounded-2xl p-1 border border-white/5 focus-within:border-[#C5A021]/30 transition-all w-[400px]">
+             <div className="flex items-center gap-2 px-3 text-[#C5A021]/60"><Zap size={14} fill="currentColor" /></div>
+             <input 
+                value={oracleInput}
+                onChange={e => setOracleInput(e.target.value)}
+                onKeyDown={e => e.key === 'Enter' && handleOracleInquiry()}
+                placeholder={isGenerating ? "Synthesizing formal logic..." : "Ask the Oracle to build a TM..."}
+                disabled={isGenerating}
+                className="bg-transparent flex-1 py-2 text-[10px] font-black uppercase tracking-widest text-white placeholder:text-white/10 focus:outline-none disabled:opacity-50"
+             />
+             <button 
+                onClick={handleOracleInquiry}
+                disabled={isGenerating}
+                className="px-4 text-[#C5A021] hover:scale-110 transition-transform disabled:opacity-50"
+             >
+                {isGenerating ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+             </button>
+          </div>
         </div>
 
         {/* Status bar */}
@@ -565,7 +633,7 @@ const TuringStudio: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       </div>
 
       {/* AI Professor Integration */}
-      <AIProfessor context="Turing Machine Simulator" />
+      <AIProfessor context={`Turing Machine Workspace. Current Program: ${transitions.length} transitions. Tape: ${tape.slice(0, 30).join('')}... Active State: ${state}`} />
     </div>
   );
 };
