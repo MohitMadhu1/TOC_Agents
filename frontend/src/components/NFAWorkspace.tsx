@@ -374,7 +374,7 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     cy.on('style', 'node', (evt) => { if (evt.target.width() !== 50 || evt.target.height() !== 50) evt.target.style({ 'width': 50, 'height': 50 }); });
 
     if (ehRef.current) ehRef.current.destroy();
-    ehRef.current = cy.edgehandles({ canConnect: () => true, hoverDelay: 50, snap: true, handleOutside: true });
+    ehRef.current = (cy as any).edgehandles({ canConnect: () => true, hoverDelay: 50, snap: true, handleOutside: true });
     
     cy.off('ehcomplete');
     cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {

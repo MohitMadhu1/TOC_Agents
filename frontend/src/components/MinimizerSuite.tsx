@@ -103,8 +103,8 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   };
 
   const minimizeDFA = () => {
-    const nodes = dfaElements.filter(e => !e.data.source).map(n => n.data);
-    const edges = dfaElements.filter(e => e.data.source).map(e => e.data);
+    const nodes = dfaElements.filter(e => !e.data.source).map(n => n.data) as any[];
+    const edges = dfaElements.filter(e => e.data.source).map(e => e.data) as any[];
     
     // 1. Remove unreachable states
     const reachable = new Set<string>();
