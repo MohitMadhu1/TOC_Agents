@@ -26,7 +26,7 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const cyDfaRef = useRef<cytoscape.Core | null>(null);
   const ehDfaRef = useRef<any>(null);
 
-  const style: cytoscape.Stylesheet[] = [
+  const style: any[] = [
     {
       selector: 'node',
       style: {

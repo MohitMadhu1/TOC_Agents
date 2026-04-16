@@ -33,7 +33,7 @@ const ConversionLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const dfaCyRef = useRef<cytoscape.Core | null>(null);
   const ehRef = useRef<any>(null);
 
-  const stylesheet: cytoscape.Stylesheet[] = [
+  const stylesheet: any[] = [
     {
       selector: 'node',
       style: {
@@ -178,7 +178,7 @@ const ConversionLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const dfaTransitions: { source: string, target: string, symbol: string }[] = [];
     const queue: string[][] = [];
 
-    const startSubset = getEpsilonClosure([initialNfaNode.data.id], edges);
+    const startSubset = getEpsilonClosure([initialNfaNode.data.id!], edges);
     queue.push(startSubset);
     dfaStates.push({ 
         id: 'A', 

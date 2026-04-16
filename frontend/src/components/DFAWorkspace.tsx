@@ -27,7 +27,7 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const cyRef = useRef<cytoscape.Core | null>(null);
   const ehRef = useRef<any>(null);
 
-  const cytoscapeStylesheet: cytoscape.Stylesheet[] = [
+  const cytoscapeStylesheet: any[] = [
     {
       selector: 'node',
       style: {

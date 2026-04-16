@@ -26,7 +26,7 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
   const minCyRef = useRef<cytoscape.Core | null>(null);
   const ehRef = useRef<any>(null);
 
-  const stylesheet: cytoscape.Stylesheet[] = [
+  const stylesheet: any[] = [
     {
       selector: 'node',
       style: {
