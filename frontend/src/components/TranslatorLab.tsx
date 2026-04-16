@@ -175,7 +175,7 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         ];
         setNfaElements(elements);
         setTimeout(() => {
-            cyRef.current?.layout({ name: 'dagre', rankDir: 'LR', nodeSep: 50, edgeSep: 50 }).run();
+            cyRef.current?.layout({ name: 'dagre', rankDir: 'LR', nodeSep: 50, edgeSep: 50 } as any).run();
         }, 200);
     } catch (e) { console.error(e); }
   };
@@ -186,7 +186,7 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const edges = dfaElements.filter(e => e.data.source);
         if (nodes.length === 0) return;
 
-        const startId = nodes.find(n => n.data.isInitial)?.data.id || nodes[0].data.id;
+        const startId = (nodes.find(n => n.data.isInitial)?.data.id || nodes[0].data.id) as string;
         const finalIds = new Set(nodes.filter(n => n.data.isFinal).map(n => n.data.id));
         if (finalIds.size === 0) { setResultRegex('∅'); return; }
 
