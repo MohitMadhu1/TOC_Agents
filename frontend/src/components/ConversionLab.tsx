@@ -238,7 +238,7 @@ const ConversionLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     nfaCyRef.current = cy;
     cy.minZoom(0.1); cy.maxZoom(4);
     if (ehRef.current) ehRef.current.destroy();
-    ehRef.current = cy.edgehandles({ canConnect: () => true, hoverDelay: 50, snap: true, handleOutside: true });
+    ehRef.current = (nfaCyRef.current as any).edgehandles({ canConnect: () => true, hoverDelay: 50, snap: true, handleOutside: true });
     
     cy.off('ehcomplete');
     cy.on('ehcomplete', (event, sourceNode, targetNode, addedEdge) => {
@@ -359,7 +359,7 @@ const ConversionLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
               <button onClick={() => nfaCyRef.current?.layout({ name: 'cose', animate: true, padding: 50 }).run()} className="px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-[#C5A021]/10 transition-all">Restore Balance</button>
             </div>
             
-            <CytoscapeComponent elements={nfaElements} stylesheet={stylesheet} style={{ width: '100%', height: '100%' }} cy={onNfaCyReady} />
+            <CytoscapeComponent elements={nfaElements} stylesheet={stylesheet} style={{ width: '100%', height: '100%' }} cy={(cy: any) => onNfaCyReady(cy)} />
 
             <AnimatePresence>
                 {selectedId && !nfaElements.find(e => e.data.id === selectedId)?.data.source && (
@@ -401,7 +401,7 @@ const ConversionLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#00FF88]">Resulting DFA</span>
             {conversionMap.length > 0 && <span className="text-[9px] font-black bg-[#00FF88]/10 text-[#00FF88] px-2 py-0.5 rounded border border-[#00FF88]/20">{conversionMap.length} States Generated</span>}
           </div>
-          <CytoscapeComponent elements={dfaElements} stylesheet={stylesheet} style={{ width: '100%', height: '100%' }} cy={(cy) => dfaCyRef.current = cy} />
+          <CytoscapeComponent elements={dfaElements} stylesheet={stylesheet} style={{ width: '100%', height: '100%' }} cy={(cy: any) => dfaCyRef.current = cy} />
           
           <div className="absolute bottom-6 right-6 w-72 max-h-64 bg-black/60 backdrop-blur-3xl border border-white/5 rounded-2xl p-5 overflow-hidden flex flex-col shadow-2xl">
             <h3 className="text-[10px] font-black text-[#C5A021] uppercase tracking-[0.4em] mb-4 flex items-center gap-2"><LayoutGrid size={14} /> Subset Mapping</h3>

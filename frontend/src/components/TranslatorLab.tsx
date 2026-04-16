@@ -475,7 +475,7 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     <CytoscapeComponent
                         key={cyKey}
                         elements={nfaElements}
-                        cy={cy => cyRef.current = cy}
+                        cy={(cy: any) => cyRef.current = cy}
                         style={{ width: '100%', height: '100%', background: 'transparent' }}
                         stylesheet={style}
                         userZoomingEnabled={true}
@@ -529,7 +529,7 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                             <button onClick={() => setShowDfaBlueprints(p => !p)} className={`px-5 py-2 rounded-full border text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${showDfaBlueprints ? 'bg-[#C5A021] text-black border-[#C5A021]' : 'bg-white/5 text-[#C5A021] border-[#C5A021]/30 hover:bg-[#C5A021]/10'}`}>Blueprints</button>
                             <button onClick={() => cyDfaRef.current?.layout({ name: 'cose', animate: true, padding: 50 }).run()} className="px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-[#C5A021]/10 transition-all">Restore Balance</button>
                         </div>
-                        <CytoscapeComponent elements={dfaElements} stylesheet={style} style={{ width: '100%', height: '100%' }} cy={onDfaCyReady} />
+                        <CytoscapeComponent elements={dfaElements} stylesheet={style} style={{ width: '100%', height: '100%' }} cy={(cy: any) => onDfaCyReady(cy)} />
                         <AnimatePresence>
                             {selectedDfaId && !dfaElements.find(e => e.data.id === selectedDfaId)?.data.source && (
                                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="absolute bottom-8 left-8 right-8 z-40 bg-black/60 backdrop-blur-3xl border border-[#C5A021]/20 rounded-3xl p-6 shadow-2xl flex items-center justify-between">

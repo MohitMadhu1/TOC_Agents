@@ -544,7 +544,7 @@ const DFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         </div>
 
         <div className="flex-grow bg-[#000816] relative overflow-hidden cursor-crosshair">
-          <CytoscapeComponent elements={elements} stylesheet={cytoscapeStylesheet} style={{ width: '100%', height: '100%' }} cy={onCyReady} layout={{ name: 'preset' }} />
+          <CytoscapeComponent elements={elements} stylesheet={cytoscapeStylesheet} style={{ width: '100%', height: '100%' }} cy={(cy: any) => onCyReady(cy)} layout={{ name: 'preset' }} />
           <AnimatePresence>
             {menu && (
               <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} style={{ top: menu.y, left: menu.x }} className="absolute z-[100] w-60 bg-black/60 backdrop-blur-3xl border border-white/10 rounded-2xl p-2 shadow-2xl flex flex-col gap-1">
