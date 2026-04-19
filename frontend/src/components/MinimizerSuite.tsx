@@ -211,7 +211,15 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
     setTable(distTable);
     setMinElements([...minNodes, ...minEdges]);
-    setTimeout(() => minCyRef.current?.layout({ name: 'cose', animate: true }).run(), 100);
+    setTimeout(() => minCyRef.current?.layout({ 
+      name: 'cose', 
+      animate: true, 
+      nodeRepulsion: 4000000, 
+      idealEdgeLength: 250, 
+      nodeOverlap: 50, 
+      componentSpacing: 200,
+      padding: 100 
+    }).run(), 100);
   };
 
   const handleOracleInquiry = async () => {
@@ -236,7 +244,13 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       
       setTimeout(() => {
         if (dfaCyRef.current) {
-          dfaCyRef.current.layout({ name: 'cose', animate: true }).run();
+            dfaCyRef.current?.layout({ 
+                name: 'dagre', 
+                rankDir: 'LR', 
+                nodeSep: 100, 
+                edgeSep: 100, 
+                rankSep: 150 
+            } as any).run();
         }
       }, 200);
 
@@ -368,7 +382,15 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <div className="w-1/2 h-full bg-[#000816] relative overflow-hidden">
             <div className="absolute top-6 left-6 z-20 flex items-center gap-4">
                 <div className="px-4 py-2 bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] text-[#C5A021]">Source DFA</div>
-                <button onClick={() => dfaCyRef.current?.layout({ name: 'cose', animate: true }).run()} className="px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-[#C5A021]/10 transition-all">Restore Balance</button>
+                <button onClick={() => cyDfaRef.current?.layout({ 
+                              name: 'cose', 
+                              animate: true, 
+                              nodeRepulsion: 4000000, 
+                              idealEdgeLength: 250, 
+                              nodeOverlap: 50, 
+                              componentSpacing: 200,
+                              padding: 100 
+                            }).run()} className="px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-[#C5A021]/10 transition-all">Restore Balance</button>
             </div>
             <CytoscapeComponent elements={dfaElements} stylesheet={stylesheet} style={{ width: '100%', height: '100%' }} cy={(cy: any) => onCyReady(cy)} />
             <AnimatePresence>

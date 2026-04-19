@@ -2,38 +2,39 @@
 
 ## Phase 1: Finite Automata (Unit 1 & 2)
 - **DFA/NFA Engine:** 
-  - Graph-based Editor with drag-and-drop states and transitions.
-  - Parallel NFA simulation and $\epsilon$-closure highlighting.
-  - NFA to DFA Subset Construction Wizard.
-- **Minimization Tool:** 
-  - Table-filling algorithm (Myhill-Nerode) visualizer to merge redundant states.
-- **Regex & Language Layer:**
-  - Regex Playground with live string highlighting.
-  - Bi-directional conversion: Regular Expression $\leftrightarrow$ Finite Automata.
-  - **The Pumping Lemma Duel:** Interactive turn-based game against an AI adversary.
+  - Graph-based Editor with drag-and-drop states and transitions using Cytoscape.
+  - Parallel NFA simulation with real-time state highlighting and $\epsilon$-closure visualization.
+  - Natural Language to Machine synthesis via the AI Oracle.
+- **Conversion Lab:** 
+  - Subset Construction Wizard that maps NFA state sets to corresponding DFA states.
+  - Interactive side-by-side visualization of the transformation process.
+- **Minimizer Suite:** 
+  - Myhill-Nerode Table-Filling algorithm visualizer.
+  - Identifies and merges redundant states to produce a Minimal DFA.
 
-## Phase 2: Grammars & PDAs (Unit 3 & 4)
-- **CFG Studio:**
-  - Production rule editor with automatic Parse Tree generation.
-  - Grammar Simplification: Step-by-step removal of Null, Unit, and Useless productions.
-  - Converter: CFG $\to$ Chomsky Normal Form (CNF).
-  - Ambiguity Detector: Visual side-by-side parse tree comparison.
-- **Pushdown Automata (PDA):**
-  - Graph UI with transition rules including stack operations.
-  - **Live Stack Animation:** Vertical stack that pushes/pops symbols in real-time.
-  - CFG to PDA Generator.
+## Phase 2: Regex & Languages (Unit 3 & 4)
+- **Regex Playground:**
+  - Real-time regex matching engine with string highlighting.
+  - Visual breakdown of regex operators and simplification patterns.
+- **RE-FA Translator:**
+  - **RE → NFA:** Automated Thompson Construction engine.
+  - **FA → RE:** Algebraic state elimination using Arden's Theorem.
+- **The Pumping Lemma Duel:** 
+  - Gamified turn-based strategy mode against an AI adversary.
+  - Prove non-regularity by strategically choosing constants and strings.
 
 ## Phase 3: Complexity & Turing Machines (Unit 5 & 6)
-- **Turing Machine Desktop:**
-  - Horizontal infinite-scrolling tape with a moving mechanical head.
-  - Pre-built library: Binary Addition, Palindrome Matching, and Multiplier machines.
-  - Instantaneous Description (ID) history logs.
-- **Theory Knowledge Graph:**
-  - Interactive diagram of Complexity Classes (P, NP, NP-Complete, NP-Hard).
-  - **The Halting Paradox:** A visual animation explaining why the Halting Problem is undecidable.
+- **Turing Studio:**
+  - Horizontal infinite-scrolling tape with real-time mechanical head animation.
+  - Instantaneous Description (ID) history tracking for debugging execution steps.
+- **Complexity Lab:**
+  - **Euler Hierarchy:** Interactive diagram of complexity classes (P, NP, NP-Complete, NP-Hard).
+  - **The Halting Paradox:** A step-by-step visual proof demonstrating the undecidability of the Halting Problem.
 
-## Phase 4: The AI Agent Layer (Global Features)
-- **LangChain Integration:**
-  - **NL-to-Theory:** "Create a DFA that accepts strings ending in '01'."
-  - **The Correctness Coach:** AI agents that analyze your machines and suggest fixes or find counter-examples.
-  - **Theory Explainer:** A sidebar agent that explains specific mathematical concepts as you build them.
+## Global AI Features
+- **The AI Oracle:**
+  - NL-to-Theory: Synthesize formal machines from prompts like "Create a DFA for binary strings with even ones."
+- **The AI Professor:**
+  - Context-aware sidebar agent that explains mathematical concepts as you interact with various labs.
+- **Correctness Coach:**
+  - Analyzes machines to identify potential logic errors or missing transitions.

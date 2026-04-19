@@ -167,7 +167,15 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       
       setTimeout(() => {
         if (cyRef.current) {
-          cyRef.current.layout({ name: 'cose', animate: true }).run();
+          cyRef.current.layout({ 
+            name: 'cose', 
+            animate: true, 
+            nodeRepulsion: 4000000, 
+            idealEdgeLength: 250, 
+            nodeOverlap: 50, 
+            componentSpacing: 200,
+            padding: 100 
+          }).run();
         }
       }, 200);
 
@@ -261,7 +269,19 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     setElements(newElements);
     setShowExamples(false);
     setSelectedId(null);
-    setTimeout(() => { if (cyRef.current) cyRef.current.fit(); }, 100);
+    setTimeout(() => {
+        if (cyRef.current) {
+          cyRef.current.layout({ 
+            name: 'cose', 
+            animate: true, 
+            nodeRepulsion: 4000000, 
+            idealEdgeLength: 250, 
+            nodeOverlap: 50, 
+            componentSpacing: 200,
+            padding: 100 
+          }).run();
+        }
+      }, 100);
   };
 
   const getEpsilonClosure = (states: string[], edges: any[]) => {
@@ -448,7 +468,15 @@ const NFAWorkspace: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         </div>
         <div className="flex items-center gap-4">
             <button onClick={() => setShowExamples(!showExamples)} className={`flex items-center gap-3 p-2 px-5 rounded-full text-[10px] uppercase font-black tracking-widest transition-all border ${showExamples ? 'bg-[#C5A021] text-black border-[#C5A021]' : 'bg-white/5 text-[#C5A021] border-[#C5A021]/30 hover:bg-[#C5A021]/10'}`}><BookOpen size={14} /> Blueprints</button>
-            <button onClick={() => cyRef.current?.layout({ name: 'cose', animate: true, padding: 80 }).run()} className="p-2 px-6 bg-white/5 border border-white/10 rounded-full text-[10px] uppercase font-black tracking-widest hover:bg-[#C5A021]/10 transition-all shadow-lg font-mono">Restore Balance</button>
+            <button onClick={() => cyRef.current?.layout({ 
+              name: 'cose', 
+              animate: true, 
+              nodeRepulsion: 4000000, 
+              idealEdgeLength: 250, 
+              nodeOverlap: 50, 
+              componentSpacing: 200,
+              padding: 100 
+            }).run()} className="p-2 px-6 bg-white/5 border border-white/10 rounded-full text-[10px] uppercase font-black tracking-widest hover:bg-[#C5A021]/10 transition-all shadow-lg font-mono">Restore Balance</button>
         </div>
       </div>
 

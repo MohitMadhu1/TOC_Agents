@@ -175,7 +175,13 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         ];
         setNfaElements(elements);
         setTimeout(() => {
-            cyRef.current?.layout({ name: 'dagre', rankDir: 'LR', nodeSep: 50, edgeSep: 50 } as any).run();
+            cyRef.current?.layout({ 
+                name: 'dagre', 
+                rankDir: 'LR', 
+                nodeSep: 100, 
+                edgeSep: 100, 
+                rankSep: 150 
+            } as any).run();
         }, 200);
     } catch (e) { console.error(e); }
   };
@@ -347,7 +353,15 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
       
       setTimeout(() => {
         if (cyDfaRef.current) {
-          cyDfaRef.current.layout({ name: 'cose', animate: true }).run();
+          cyDfaRef.current.layout({ 
+            name: 'cose', 
+            animate: true, 
+            nodeRepulsion: 4000000, 
+            idealEdgeLength: 250, 
+            nodeOverlap: 50, 
+            componentSpacing: 200,
+            padding: 100 
+          }).run();
         }
       }, 200);
 
@@ -527,7 +541,15 @@ const TranslatorLab: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                         <div className="absolute top-6 left-6 z-20 flex items-center gap-4">
                             <div className="px-4 py-2 bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl"><span className="text-[10px] font-black uppercase tracking-[0.3em] text-[#C5A021]">Source DFA</span></div>
                             <button onClick={() => setShowDfaBlueprints(p => !p)} className={`px-5 py-2 rounded-full border text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 ${showDfaBlueprints ? 'bg-[#C5A021] text-black border-[#C5A021]' : 'bg-white/5 text-[#C5A021] border-[#C5A021]/30 hover:bg-[#C5A021]/10'}`}>Blueprints</button>
-                            <button onClick={() => cyDfaRef.current?.layout({ name: 'cose', animate: true, padding: 50 }).run()} className="px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-[#C5A021]/10 transition-all">Restore Balance</button>
+                            <button onClick={() => cyDfaRef.current?.layout({ 
+                              name: 'cose', 
+                              animate: true, 
+                              nodeRepulsion: 4000000, 
+                              idealEdgeLength: 250, 
+                              nodeOverlap: 50, 
+                              componentSpacing: 200,
+                              padding: 100 
+                            }).run()} className="px-5 py-2 bg-white/5 border border-white/10 rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-[#C5A021]/10 transition-all">Restore Balance</button>
                         </div>
                         <CytoscapeComponent elements={dfaElements} stylesheet={style} style={{ width: '100%', height: '100%' }} cy={(cy: any) => onDfaCyReady(cy)} />
                         <AnimatePresence>
