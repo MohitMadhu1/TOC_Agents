@@ -382,7 +382,7 @@ const MinimizerSuite: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         <div className="w-1/2 h-full bg-[#000816] relative overflow-hidden">
             <div className="absolute top-6 left-6 z-20 flex items-center gap-4">
                 <div className="px-4 py-2 bg-black/40 backdrop-blur-xl border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-[0.3em] text-[#C5A021]">Source DFA</div>
-                <button onClick={() => cyDfaRef.current?.layout({ 
+                <button onClick={() => dfaCyRef.current?.layout({ 
                               name: 'cose', 
                               animate: true, 
                               nodeRepulsion: 4000000, 
